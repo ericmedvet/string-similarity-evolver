@@ -167,7 +167,7 @@ public class VirtualMachine {
       errorCode = e.getCauseErrorCode();
       if (debug) {
         System.out.printf("pc=%d error=%s\n", programCounter, errorCode);
-        for (int i = 0; i<programCounter+1; i++) {
+        for (int i = 0; i<programCounter; i++) {
           System.out.printf("%4d: %s\n", i, operations.get(i));
         }
       }

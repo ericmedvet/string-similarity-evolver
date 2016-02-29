@@ -28,7 +28,7 @@ public class Evaluator {
   private final Multiset<VirtualMachine.ErrorCode> errorCodes = HashMultiset.create();
 
   public enum ResultType {
-    OVERLAPNESS, AVG_OPS, ERROR_RATIO, AVG_FOOTPRINT
+    OVERLAPNESS, AVG_OPS, ERROR_RATIO, AVG_FOOTPRINT, SIZE
   }
 
   public Evaluator(VirtualMachine vm, List<Multimap<Boolean, String>> datasets) {
@@ -88,7 +88,7 @@ public class Evaluator {
 
   private float execute(List<Operation> operations, String string1, String string2, EnumMap<ResultType, Double> stats) {
     vm.reset();
-    float s = vm.execute(operations, string1, string2, true);
+    float s = vm.execute(operations, string1, string2, false);
     evaluatedCount = evaluatedCount+1;
     stats.put(ResultType.AVG_OPS, stats.get(ResultType.AVG_OPS) + vm.getOps());
     stats.put(ResultType.AVG_FOOTPRINT, stats.get(ResultType.AVG_FOOTPRINT) + vm.getNumbersWriteFootprint() + vm.getMaxOverallListSizes());

@@ -45,8 +45,9 @@ public class MyGeneticAlgorithm extends GeneticAlgorithm {
       List<EnumMap<Evaluator.ResultType, Double>> statsList = new ArrayList<>(current.getPopulationSize());
       Iterator<Chromosome> iterator = current.iterator();
       while(iterator.hasNext()) {
-        EnumMap<Evaluator.ResultType, Double> stats = ((OperationsChromosome)iterator.next()).getStats();
-        if (stats!=null) {
+        OperationsChromosome chromosome = (OperationsChromosome)iterator.next();
+        EnumMap<Evaluator.ResultType, Double> stats = chromosome.getStats();
+        if (stats.containsKey(Evaluator.ResultType.OVERLAPNESS)) {
           statsList.add(stats);
         }
       }
@@ -63,8 +64,9 @@ public class MyGeneticAlgorithm extends GeneticAlgorithm {
       System.out.printf("ops=%4.0f/%4.0f/%4.0f   ", bestStats.get(Evaluator.ResultType.AVG_OPS), top10Stats.get(Evaluator.ResultType.AVG_OPS), allStats.get(Evaluator.ResultType.AVG_OPS));
       System.out.printf("mfp=%4.0f/%4.0f/%4.0f   ", bestStats.get(Evaluator.ResultType.AVG_FOOTPRINT), top10Stats.get(Evaluator.ResultType.AVG_FOOTPRINT), allStats.get(Evaluator.ResultType.AVG_FOOTPRINT));
       System.out.printf("err=%5.3f/%5.3f/%5.3f   ", bestStats.get(Evaluator.ResultType.ERROR_RATIO), top10Stats.get(Evaluator.ResultType.ERROR_RATIO), allStats.get(Evaluator.ResultType.ERROR_RATIO));
+      System.out.printf("size=%3.0f/%3.0f/%3.0f   ", bestStats.get(Evaluator.ResultType.SIZE), top10Stats.get(Evaluator.ResultType.SIZE), allStats.get(Evaluator.ResultType.SIZE));
       System.out.printf("evals=%8d\n", evaluator.getEvaluatedCount());
-      System.out.println(evaluator.getErrorCodes());
+      //System.out.println(evaluator.getErrorCodes());
     }
     return current;
   }

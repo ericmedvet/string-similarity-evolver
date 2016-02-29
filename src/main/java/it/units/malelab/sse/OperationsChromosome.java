@@ -21,7 +21,7 @@ import org.apache.commons.math3.genetics.Chromosome;
 public class OperationsChromosome extends BinaryChromosome {
   
   private static final int N_OPS = 100;
-  private static final int MAX_INDEX = 10;
+  private static final int MAX_INDEX = 4;
   private static final int BITS;
   private static final int BITS_PER_OP;
   private static final int BITS_PER_OPCODE;
@@ -34,8 +34,7 @@ public class OperationsChromosome extends BinaryChromosome {
   }
   
   private final Evaluator evaluator;
-  private EnumMap<Evaluator.ResultType, Double> stats;
-  private double fitness;
+  private final EnumMap<Evaluator.ResultType, Double> stats = new EnumMap<>(Evaluator.ResultType.class);
 
   public OperationsChromosome(Evaluator evaluator) {
     super(BinaryChromosome.randomBinaryRepresentation(BITS));
@@ -49,11 +48,10 @@ public class OperationsChromosome extends BinaryChromosome {
 
   @Override
   public double fitness() {
-    if (stats==null) {
-      stats = evaluator.evaluate(getOperations());
-      fitness = stats.get(Evaluator.ResultType.OVERLAPNESS);
+    if (!stats.containsKey(Evaluator.ResultType.OVERLAPNESS)) {
+      stats.putAll(evaluator.evaluate(getOperations()));
     }
-    return fitness;
+    return stats.get(Evaluator.ResultType.OVERLAPNESS);
   }
   
   public List<Operation> getOperations() {
@@ -64,6 +62,7 @@ public class OperationsChromosome extends BinaryChromosome {
         operations.add(operation);
       }
     }
+    stats.put(Evaluator.ResultType.SIZE, new Double(operations.size()));
     return operations;
   }
   
@@ -99,14 +98,18 @@ public class OperationsChromosome extends BinaryChromosome {
   public int compareTo(Chromosome another) {
     int fitnessComparison = -Double.compare(getFitness(), another.getFitness());
     int errorRatioComparison = -Double.compare(getStats().get(Evaluator.ResultType.ERROR_RATIO), ((OperationsChromosome)another).getStats().get(Evaluator.ResultType.ERROR_RATIO));
-    int opsComparison = Double.compare(getStats().get(Evaluator.ResultType.AVG_OPS), ((OperationsChromosome)another).getStats().get(Evaluator.ResultType.AVG_OPS));
+    int opsComparison = -Double.compare(getStats().get(Evaluator.ResultType.AVG_OPS), ((OperationsChromosome)another).getStats().get(Evaluator.ResultType.AVG_OPS));
+    int sizeComparison = -Double.compare(getStats().get(Evaluator.ResultType.SIZE), ((OperationsChromosome)another).getStats().get(Evaluator.ResultType.SIZE));
     if (fitnessComparison!=0) {
       return fitnessComparison;
     }
     if (errorRatioComparison!=0) {
       return errorRatioComparison;
     }
-    return opsComparison;
+    if (opsComparison!=0) {
+      return opsComparison;
+    }
+    return sizeComparison;
   }
   
 }
