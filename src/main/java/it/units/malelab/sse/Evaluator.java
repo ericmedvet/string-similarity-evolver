@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -22,18 +23,24 @@ import java.util.List;
 public class Evaluator {
 
   private final VirtualMachine vm;
-  private final List<Multimap<Boolean, String>> datasets;
+  private final List<Map<Boolean, List<String>>> datasets;
+  private final int minStringsPerDataset;
+  private final int maxStringsPerDataset;
   
   private int evaluatedCount = 0;
+  private int stringsPerDataset;
   private final Multiset<VirtualMachine.ErrorCode> errorCodes = HashMultiset.create();
 
   public enum ResultType {
     OVERLAPNESS, AVG_OPS, ERROR_RATIO, AVG_FOOTPRINT, SIZE
   }
 
-  public Evaluator(VirtualMachine vm, List<Multimap<Boolean, String>> datasets) {
+  public Evaluator(VirtualMachine vm, List<Map<Boolean, List<String>>> datasets, int minStringsPerDataset, int maxStringsPerDataset) {
     this.vm = vm;
     this.datasets = datasets;
+    this.minStringsPerDataset = minStringsPerDataset;
+    this.maxStringsPerDataset = maxStringsPerDataset;
+    stringsPerDataset = minStringsPerDataset;
   }
 
   public EnumMap<ResultType, Double> evaluate(List<Operation> operations) {
@@ -43,15 +50,15 @@ public class Evaluator {
     stats.put(ResultType.AVG_OPS, 0d);
     stats.put(ResultType.ERROR_RATIO, 0d);
     stats.put(ResultType.OVERLAPNESS, 0d);
-    for (Multimap<Boolean, String> dataset : datasets) {
+    for (Map<Boolean, List<String>> dataset : datasets) {
       List<Float> ttSimilarities = new ArrayList<>();
       List<Float> tfSimilarities = new ArrayList<>();
-      for (String string1 : dataset.get(Boolean.TRUE)) {
-        for (String string2 : dataset.get(Boolean.TRUE)) {
+      for (String string1 : dataset.get(Boolean.TRUE).subList(0, Math.min(stringsPerDataset, dataset.get(Boolean.TRUE).size()))) {
+        for (String string2 : dataset.get(Boolean.TRUE).subList(0, Math.min(stringsPerDataset, dataset.get(Boolean.TRUE).size()))) {
           count = count + 1;
           ttSimilarities.add(execute(operations, string1, string2, stats));
         }
-        for (String string2 : dataset.get(Boolean.FALSE)) {
+        for (String string2 : dataset.get(Boolean.FALSE).subList(0, Math.min(stringsPerDataset, dataset.get(Boolean.FALSE).size()))) {
           count = count + 1;
           tfSimilarities.add(execute(operations, string1, string2, stats));
         }

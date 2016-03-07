@@ -9,8 +9,11 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import it.units.malelab.sse.language.Operation;
 import it.units.malelab.sse.language.VirtualMachine;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import org.apache.commons.math3.genetics.BinaryMutation;
 import org.apache.commons.math3.genetics.Chromosome;
 import org.apache.commons.math3.genetics.ElitisticListPopulation;
@@ -26,22 +29,15 @@ import org.apache.commons.math3.random.JDKRandomGenerator;
  */
 public class Main {
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws IOException {
+    Random random = new Random(1);
     VirtualMachine vm = new VirtualMachine(4, 4, 400);
-    List<Multimap<Boolean, String>> datasets = new ArrayList<>();
-    ArrayListMultimap<Boolean, String> dataset0 = ArrayListMultimap.create();
-    dataset0.put(Boolean.TRUE, "02/03/1979");
-    dataset0.put(Boolean.TRUE, "07/02/2011");
-    dataset0.put(Boolean.FALSE, "eric");
-    dataset0.put(Boolean.FALSE, "alice");
-    ArrayListMultimap<Boolean, String> dataset1 = ArrayListMultimap.create();
-    dataset1.put(Boolean.TRUE, "@EricMedvetTs");
-    dataset1.put(Boolean.TRUE, "@MaleLabTs");
-    dataset1.put(Boolean.FALSE, "ecolo;");
-    dataset1.put(Boolean.FALSE, "#petaloso");
-    datasets.add(dataset0);
-    datasets.add(dataset1);
-    Evaluator evaluator = new Evaluator(vm, datasets);
+    List<Map<Boolean, List<String>>> datasets = new ArrayList<>();
+    datasets.add(Util.loadStrings("/home/eric/Documenti/esperimenti/datasets/Bills-Date.txt", random));
+    datasets.add(Util.loadStrings("/home/eric/Documenti/esperimenti/datasets/Log-IP.txt", random));
+    datasets.add(Util.loadStrings("/home/eric/Documenti/esperimenti/datasets/Twitter-URL.txt", random));
+    
+    Evaluator evaluator = new Evaluator(vm, datasets, 1, 10);
 
     MyGeneticAlgorithm ga = new MyGeneticAlgorithm(
             new OnePointCrossover<Integer>(),
